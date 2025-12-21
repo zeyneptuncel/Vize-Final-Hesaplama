@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AÖF Not Hesaplama Sistemi</title>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --primary: #4a69bd; 
+            --success: #009432; 
+            --fail: #c0392b;    
+            --text-dark: #2c3e50;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Quicksand', sans-serif; }
+
+        body {
+            background: linear-gradient(135deg, #2c3e50 0%, #4ca1af 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: var(--card-bg);
+            border-radius: 15px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+            width: 100%;
+            max-width: 450px;
+            padding: 40px 30px;
+            text-align: center;
+            position: relative;
+            backdrop-filter: blur(5px);
+        }
+
+        h1 { color: var(--text-dark); margin-bottom: 5px; font-weight: 700; font-size: 1.6rem; letter-spacing: -0.5px; }
+        p.desc { color: #576574; font-size: 0.9rem; margin-bottom: 25px; font-weight: 500; }
+
+        .tabs {
+            display: flex;
+            background: #dfe6e9;
+            padding: 4px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            background: transparent;
+            border-radius: 6px;
+            font-weight: 600;
+            color: #636e72;
+            cursor: pointer;
+            transition: 0.3s;
+            font-size: 0.9rem;
+        }
+
+        .tab-btn.active {
+            background: #fff;
+            color: var(--primary);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .input-group { margin-bottom: 15px; text-align: left; }
+        label { margin-left: 5px; font-size: 0.85rem; font-weight: 700; color: #2c3e50; display:block; margin-bottom:5px; }
+        
+        input {
+            width: 100%;
+            padding: 14px;
+            border: 1px solid #ced6e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            outline: none;
+            transition: 0.3s;
+            color: var(--text-dark);
+            background: #f1f2f6;
+        }
+        input:focus { border-color: var(--primary); background: #fff; }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            background: var(--primary);
+            color: white;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .btn:hover { background: #3c5aa6; }
+
+        .result-box {
+            display: none;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #dfe6e9;
+            animation: fadeIn 0.4s ease;
+        }
+
+        .big-score {
+            font-size: 4rem;
+            font-weight: 700;
+            line-height: 1;
+            margin-bottom: 5px;
+            color: var(--text-dark);
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 8px 25px;
+            border-radius: 4px;
+            color: white;
+            font-weight: 700;
+            font-size: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .target-card {
+            background: #f1f2f6;
+            color: #2d3436;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            border: 1px solid #dfe6e9;
+        }
+        .target-num { 
+            font-size: 2.5rem; 
+            font-weight: 700; 
+            display: block; 
+            color: var(--primary);
+            margin: 5px 0;
+        }
+        .target-text { font-size: 0.85rem; color: #636e72; font-weight: 600; }
+
+        .footer-sign {
+            margin-top: 35px;
+            font-size: 0.8rem;
+            color: #7f8c8d;
+            font-weight: 500;
+            border-top: 1px solid rgba(0,0,0,0.05);
+            padding-top: 15px;
+        }
+        .footer-sign span { color: #2c3e50; font-weight: 700; }
+
+        .hidden { display: none; }
+        @keyframes fadeIn { from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>AÖF Not Hesaplama</h1>
+    <p class="desc">Vize %30 + Final %70 | Geçme Sınırı: 35.00</p>
+
+    <div class="tabs">
+        <button class="tab-btn active" onclick="setTab('calc')">Not Hesapla</button>
+        <button class="tab-btn" onclick="setTab('analyze')">Geçme Analizi</button>
+    </div>
+
+    <div id="tab-calc">
+        <div class="input-group">
+            <label>Vize Notu</label>
+            <input type="number" id="vizeIn" placeholder="0-100" step="0.01" oninput="hideRes()">
+        </div>
+        <div class="input-group">
+            <label>Final Notu</label>
+            <input type="number" id="finalIn" placeholder="0-100" step="0.01" oninput="hideRes()">
+        </div>
+        <button class="btn" onclick="calculate()">HESAPLA</button>
+
+        <div id="res-calc" class="result-box">
+            <div id="scoreDisplay" class="big-score">--</div>
+            <p style="color:#7f8c8d; font-size:0.9rem; margin-bottom:15px; font-weight:500;">Ders Başarı Ortalaması</p>
+            <div id="statusBadge" class="status-badge">--</div>
+        </div>
+    </div>
+
+    <div id="tab-analyze" class="hidden">
+        <div class="input-group">
+            <label>Vize Notu</label>
+            <input type="number" id="vizeAnaliz" placeholder="Vize notunu giriniz" step="0.01" oninput="analyze()">
+        </div>
+        
+        <div id="res-analyze" class="result-box" style="display:block; border:none; padding-top:0;">
+            <p style="font-size:0.9rem; color:#636e72; margin-bottom:15px;">Dersi geçmek (Min. 35.00) için:</p>
+            
+            <div class="target-card">
+                <span class="target-text">Gereken Final Notu</span>
+                <span id="neededScore" class="target-num">--</span>
+                <span class="target-text">veya üzeri olmalıdır.</span>
+            </div>
+            
+            <p id="extraMsg" style="margin-top:20px; font-size:0.85rem; color:var(--primary); font-weight:600;"></p>
+        </div>
+    </div>
+
+    <div class="footer-sign">
+        Hazırlayan: <span>Zeynep Tuncel</span>
+    </div>
+</div>
+
+<script>
+    function setTab(t) {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById('tab-calc').classList.add('hidden');
+        document.getElementById('tab-analyze').classList.add('hidden');
+        document.getElementById('res-calc').style.display = 'none';
+
+        if(t === 'calc') {
+            document.querySelector('.tab-btn:first-child').classList.add('active');
+            document.getElementById('tab-calc').classList.remove('hidden');
+        } else {
+            document.querySelector('.tab-btn:last-child').classList.add('active');
+            document.getElementById('tab-analyze').classList.remove('hidden');
+        }
+    }
+
+    function hideRes() { document.getElementById('res-calc').style.display = 'none'; }
+
+    function calculate() {
+        const v = parseFloat(document.getElementById('vizeIn').value);
+        const f = parseFloat(document.getElementById('finalIn').value);
+
+        if(isNaN(v) || isNaN(f)) { alert("Lütfen tüm not alanlarını doldurunuz."); return; }
+        if(v<0 || v>100 || f<0 || f>100) { alert("Lütfen 0 ile 100 arasında geçerli bir not giriniz."); return; }
+
+        const avg = (v * 0.3) + (f * 0.7);
+        
+        const scoreDiv = document.getElementById('scoreDisplay');
+        const badge = document.getElementById('statusBadge');
+        
+        document.getElementById('res-calc').style.display = 'block';
+        scoreDiv.innerText = avg.toFixed(2); 
+
+        if(avg >= 35) {
+            scoreDiv.style.color = 'var(--success)';
+            badge.innerText = "DERS GEÇİLDİ";
+            badge.style.background = 'var(--success)';
+        } else {
+            scoreDiv.style.color = 'var(--fail)';
+            badge.innerText = "DERSTEN KALINDI";
+            badge.style.background = 'var(--fail)';
+        }
+    }
+
+    function analyze() {
+        const v = parseFloat(document.getElementById('vizeAnaliz').value);
+        const neededDiv = document.getElementById('neededScore');
+        const msgDiv = document.getElementById('extraMsg');
+
+        neededDiv.style.color = "var(--primary)";
+
+        if(isNaN(v)) { 
+            neededDiv.innerText = "--"; 
+            msgDiv.innerText = "";
+            return; 
+        }
+
+        if (v < 0 || v > 100) {
+            neededDiv.innerText = "!";
+            msgDiv.innerText = "Lütfen 0-100 aralığında geçerli bir not giriniz.";
+            msgDiv.style.color = "var(--fail)";
+            return;
+        }
+
+        let req = (35 - (v * 0.3)) / 0.7;
+        
+        //req = Math.ceil(req); // Yuvarlama yok, virgüllü hesap.
+
+        if (req <= 0) {
+            neededDiv.innerText = "0.00";
+            msgDiv.innerText = "Mevcut vize notunuz ile dersi geçmek için finalden puan alma zorunluluğu yoktur.";
+            neededDiv.style.color = "var(--success)";
+            msgDiv.style.color = "var(--success)";
+        } else if (req > 100) {
+            neededDiv.innerText = "N/A";
+            msgDiv.innerText = "Mevcut vize notu ile ders geçme barajına (35) ulaşılması matematiksel olarak mümkün değildir.";
+            neededDiv.style.color = "var(--fail)";
+            msgDiv.style.color = "var(--fail)";
+        } else {
+            neededDiv.innerText = req.toFixed(2);
+            msgDiv.innerText = "Ortalamanın 35 olması için gereken final notudur.";
+            neededDiv.style.color = "var(--primary)";
+            msgDiv.style.color = "var(--primary)";
+        }
+    }
+</script>
+
+</body>
+</html>
